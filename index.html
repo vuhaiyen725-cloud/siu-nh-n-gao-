@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Siêu Nhân Gao Đỏ - Game Phát Âm</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    font-family:'Fredoka',sans-serif;
+    background:linear-gradient(to bottom,#ffe5e5,#ffd0d0);
+    overflow-x:hidden;
+}
+
+.card{
+    transform-style:preserve-3d;
+    transition:0.6s;
+}
+
+.flip{
+    transform:rotateY(180deg);
+}
+
+.front,.back{
+    backface-visibility:hidden;
+}
+
+.back{
+    transform:rotateY(180deg);
+}
+
+@keyframes shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-8px)}
+    50%{transform:translateX(8px)}
+    75%{transform:translateX(-8px)}
+    100%{transform:translateX(0)}
+}
+
+.shake{
+    animation:shake .4s;
+}
+
+@keyframes kick{
+    0%{transform:translateX(0)}
+    50%{transform:translateX(140px) rotate(15deg)}
+    100%{transform:translateX(0)}
+}
+
+.kick{
+    animation:kick .8s;
+}
+
+@keyframes fall{
+    100%{
+        transform:translateY(250px) rotate(90deg);
+        opacity:0;
+    }
+}
+
+.fall{
+    animation:fall 1s forwards;
+}
+
+.confetti{
+    position:fixed;
+    width:10px;
+    height:10px;
+    top:-10px;
+    animation:drop 3s linear forwards;
+}
+
+@keyframes drop{
+    to{
+        transform:translateY(100vh) rotate(360deg);
+    }
+}
+
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center p-4">
+
+<!-- HEADER -->
+
+<div class="bg-white border-4 border-red-600 rounded-3xl shadow-2xl p-4 w-full max-w-5xl">
+
+<div class="flex justify-between items-center flex-wrap gap-4">
+
+<div>
+<h1 class="text-3xl text-red-600">
+⚡ SIÊU NHÂN GAO ĐỎ ⚡
+</h1>
+
+<p class="text-red-400">
+Luyện phát âm tiếng Anh lớp 3
+</p>
+</div>
+
+<div class="text-right">
+
+<p class="text-red-600 text-xl">
+Điểm:
+<span id="score">
+0
+</span>
+</p>
+
+<p class="text-red-600 text-xl">
+Câu:
+<span id="question">
+1
+</span>/10
+</p>
+
+</div>
+
+</div>
+
+<div class="w-full bg-red-100 h-5 rounded-full mt-4 overflow-hidden">
+
+<div id="progress"
+class="bg-red-600 h-5 rounded-full transition-all duration-500"
+style="width:10%">
+</div>
+
+</div>
+
+</div>
+
+<!-- INTRO -->
+
+<div id="intro"
+class="bg-white border-4 border-red-600 rounded-3xl shadow-2xl mt-6 p-6 max-w-3xl text-center">
+
+<img src="https://i.imgur.com/4AiXzf8.png"
+class="w-52 mx-auto mb-4">
+
+<h2 class="text-4xl text-red-600">
+Xin chào chiến binh Gao Đỏ!
+</h2>
+
+<p class="mt-4 text-gray-700 text-lg leading-relaxed">
+
+Con quái vật đang tấn công thành phố!<br>
+Hãy phát âm đúng từ tiếng Anh để tung cú đá đánh bại chúng nhé!
+
+</p>
+
+<div class="bg-red-50 rounded-2xl p-4 mt-5 text-left">
+
+<p class="text-red-600 text-xl mb-2">
+📖 Luật chơi
+</p>
+
+<ul class="space-y-2 text-gray-700">
+<li>• Lật flashcard để xem nghĩa.</li>
+<li>• Nhấn "Nghe từ".</li>
+<li>• Giữ micro và phát âm.</li>
+<li>• Đúng ➜ Gao đá quái vật.</li>
+<li>• Sai ➜ mất máu và thử lại.</li>
+</ul>
+
+</div>
+
+<button onclick="startGame()"
+class="mt-6 bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-2xl text-2xl shadow-xl">
+BẮT ĐẦU
+</button>
+
+</div>
+
+<!-- GAME -->
+
+<div id="game"
+class="hidden w-full max-w-5xl mt-6">
+
+<!-- ARENA -->
+
+<div class="bg-gradient-to-b from-sky-300 to-sky-100 border-4 border-white rounded-3xl shadow-2xl p-6">
+
+<div class="flex justify-between items-end">
+
+<!-- HERO -->
+
+<div class="text-center">
+
+<img id="hero"
+src="https://i.imgur.com/4AiXzf8.png"
+class="w-52 mx-auto">
+
+<div class="bg-red-600 text-white px-4 py-1 rounded-full inline-block mt-2">
+GAO ĐỎ
+</div>
+
+<div class="bg-gray-200 rounded-full h-5 overflow-hidden mt-4 w-48">
+
+<div id="hp"
+class="bg-red-600 h-5 transition-all"
+style="width:100%">
+</div>
+
+</div>
+
+</div>
+
+<!-- MONSTER -->
+
+<div class="text-center">
+
+<div id="monster"
+class="text-9xl">
+👾
+</div>
+
+<div class="bg-purple-600 text-white px-4 py-1 rounded-full inline-block">
+QUÁI VẬT
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- FLASHCARD -->
+
+<div class="flex justify-center mt-8">
+
+<div onclick="flipCard()"
+class="relative w-80 h-64 cursor-pointer">
+
+<div id="card"
+class="card relative w-full h-full">
+
+<!-- FRONT -->
+
+<div class="front absolute w-full h-full bg-white border-4 border-red-600 rounded-3xl shadow-2xl flex flex-col justify-center items-center">
+
+<p class="text-red-400">
+Bấm để lật thẻ
+</p>
+
+<h2 id="word"
+class="text-5xl text-red-600 mt-4">
+apple
+</h2>
+
+<p id="ipa"
+class="text-gray-500 mt-2">
+/ˈæp.əl/
+</p>
+
+</div>
+
+<!-- BACK -->
+
+<div class="back absolute w-full h-full bg-red-600 border-4 border-white rounded-3xl shadow-2xl flex flex-col justify-center items-center text-white">
+
+<div id="emoji"
+class="text-7xl">
+🍎
+</div>
+
+<h2 id="meaning"
+class="text-4xl mt-4">
+Quả táo
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CONTROLS -->
+
+<div class="bg-white border-4 border-red-600 rounded-3xl shadow-2xl p-6 mt-6 text-center">
+
+<p class="text-red-600 text-2xl">
+🎤 Hãy phát âm:
+<span id="target"
+class="underline">
+apple
+</span>
+</p>
+
+<div class="flex justify-center gap-4 flex-wrap mt-6">
+
+<button onclick="speakWord()"
+class="bg-blue-500 hover:bg-blue-400 text-white px-6 py-3 rounded-2xl text-xl">
+🔊 Nghe từ
+</button>
+
+<button
+onmousedown="startListening()"
+onmouseup="stopListening()"
+ontouchstart="startListening()"
+ontouchend="stopListening()"
+class="bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-full text-3xl shadow-xl">
+🎤
+</button>
+
+</div>
+
+<div id="message"
+class="mt-6 text-2xl font-bold min-h-[40px]">
+</div>
+
+<div class="mt-5">
+
+<button id="nextBtn"
+onclick="nextQuestion()"
+class="hidden bg-green-500 hover:bg-green-400 text-white px-8 py-3 rounded-2xl text-xl">
+Tiếp theo
+</button>
+
+<button id="retryBtn"
+onclick="retryQuestion()"
+class="hidden bg-yellow-500 hover:bg-yellow-400 text-white px-8 py-3 rounded-2xl text-xl">
+Thử lại
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- RESULT -->
+
+<div id="result"
+class="hidden bg-white border-4 border-red-600 rounded-3xl shadow-2xl p-8 mt-6 text-center max-w-3xl">
+
+<h2 class="text-5xl text-red-600">
+🎉 CHIẾN THẮNG 🎉
+</h2>
+
+<p class="text-2xl mt-4 text-gray-700">
+Bạn đã bảo vệ Trái Đất thành công!
+</p>
+
+<div class="bg-red-50 rounded-3xl p-6 mt-6">
+
+<p class="text-3xl text-red-600">
+Tổng điểm:
+<span id="finalScore">
+0
+</span>
+</p>
+
+<p class="text-xl mt-3 text-gray-700">
+Đúng:
+<span id="correctCount">
+0
+</span>/10
+</p>
+
+</div>
+
+<button onclick="location.reload()"
+class="mt-6 bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-2xl text-2xl">
+Chơi lại
+</button>
+
+</div>
+
+<script>
+
+const words = [
+
+{word:"apple",meaning:"Quả táo",ipa:"/ˈæp.əl/",emoji:"🍎"},
+{word:"banana",meaning:"Quả chuối",ipa:"/bəˈnɑː.nə/",emoji:"🍌"},
+{word:"dog",meaning:"Con chó",ipa:"/dɒg/",emoji:"🐶"},
+{word:"cat",meaning:"Con mèo",ipa:"/kæt/",emoji:"🐱"},
+{word:"book",meaning:"Quyển sách",ipa:"/bʊk/",emoji:"📚"},
+{word:"bird",meaning:"Con chim",ipa:"/bɜːd/",emoji:"🐦"},
+{word:"robot",meaning:"Robot",ipa:"/ˈroʊ.bɑːt/",emoji:"🤖"},
+{word:"ball",meaning:"Quả bóng",ipa:"/bɔːl/",emoji:"⚽"},
+{word:"teacher",meaning:"Giáo viên",ipa:"/ˈtiː.tʃər/",emoji:"👩‍🏫"},
+{word:"house",meaning:"Ngôi nhà",ipa:"/haʊs/",emoji:"🏠"}
+
+];
+
+let current = 0;
+let score = 0;
+let hp = 100;
+let correct = 0;
+
+const recognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition
+? new (window.SpeechRecognition ||
+window.webkitSpeechRecognition)()
+: null;
+
+if(recognition){
+
+recognition.lang = "en-US";
+
+recognition.onresult = (e)=>{
+
+const text =
+e.results[0][0].transcript.toLowerCase();
+
+checkAnswer(text);
+
+};
+
+}
+
+function startGame(){
+
+document.getElementById("intro")
+.classList.add("hidden");
+
+document.getElementById("game")
+.classList.remove("hidden");
+
+loadQuestion();
+
+}
+
+function loadQuestion(){
+
+const q = words[current];
+
+document.getElementById("word").innerText = q.word;
+document.getElementById("meaning").innerText = q.meaning;
+document.getElementById("ipa").innerText = q.ipa;
+document.getElementById("emoji").innerText = q.emoji;
+document.getElementById("target").innerText = q.word;
+
+document.getElementById("question").innerText =
+current + 1;
+
+document.getElementById("progress").style.width =
+`${(current + 1) * 10}%`;
+
+document.getElementById("message").innerText = "";
+
+document.getElementById("nextBtn")
+.classList.add("hidden");
+
+document.getElementById("retryBtn")
+.classList.add("hidden");
+
+document.getElementById("monster")
+.classList.remove("fall");
+
+document.getElementById("hero")
+.classList.remove("kick");
+
+}
+
+function flipCard(){
+
+document.getElementById("card")
+.classList.toggle("flip");
+
+}
+
+function speakWord(){
+
+const utter =
+new SpeechSynthesisUtterance(
+words[current].word
+);
+
+utter.lang = "en-US";
+utter.rate = 0.8;
+
+speechSynthesis.speak(utter);
+
+}
+
+function startListening(){
+
+if(recognition){
+recognition.start();
+}
+
+}
+
+function stopListening(){
+
+if(recognition){
+recognition.stop();
+}
+
+}
+
+function checkAnswer(text){
+
+const correctWord =
+words[current].word.toLowerCase();
+
+if(text.includes(correctWord)){
+
+score += 10;
+correct++;
+
+document.getElementById("score")
+.innerText = score;
+
+document.getElementById("message")
+.innerHTML =
+`<span class="text-green-500">
+✅ Chính xác! Gao Đỏ tung cú đá siêu mạnh!
+</span>`;
+
+playCorrect();
+
+document.getElementById("hero")
+.classList.add("kick");
+
+setTimeout(()=>{
+
+document.getElementById("monster")
+.classList.add("fall");
+
+createConfetti();
+
+},400);
+
+document.getElementById("nextBtn")
+.classList.remove("hidden");
+
+}else{
+
+hp -= 15;
+
+if(hp < 0){
+hp = 0;
+}
+
+document.getElementById("hp").style.width =
+`${hp}%`;
+
+document.getElementById("message")
+.innerHTML =
+`<span class="text-yellow-500">
+❌ Gần đúng rồi! Hãy thử lại nhé!
+</span>`;
+
+playWrong();
+
+document.getElementById("card")
+.classList.add("shake");
+
+setTimeout(()=>{
+
+document.getElementById("card")
+.classList.remove("shake");
+
+},400);
+
+document.getElementById("retryBtn")
+.classList.remove("hidden");
+
+}
+
+}
+
+function retryQuestion(){
+
+document.getElementById("retryBtn")
+.classList.add("hidden");
+
+document.getElementById("message")
+.innerText =
+"🎤 Hãy thử phát âm lại nhé!";
+
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current >= 10){
+
+endGame();
+return;
+
+}
+
+loadQuestion();
+
+}
+
+function endGame(){
+
+document.getElementById("game")
+.classList.add("hidden");
+
+document.getElementById("result")
+.classList.remove("hidden");
+
+document.getElementById("finalScore")
+.innerText = score;
+
+document.getElementById("correctCount")
+.innerText = correct;
+
+}
+
+function playCorrect(){
+
+const audio =
+new Audio(
+"https://actions.google.com/sounds/v1/cartoon/pop.ogg"
+);
+
+audio.play();
+
+}
+
+function playWrong(){
+
+const audio =
+new Audio(
+"https://actions.google.com/sounds/v1/cartoon/boing.ogg"
+);
+
+audio.play();
+
+}
+
+function createConfetti(){
+
+for(let i=0;i<40;i++){
+
+const conf =
+document.createElement("div");
+
+conf.classList.add("confetti");
+
+conf.style.left =
+Math.random()*100+"vw";
+
+conf.style.background =
+`hsl(${Math.random()*360},100%,50%)`;
+
+conf.style.animationDuration =
+(Math.random()*2+2)+"s";
+
+document.body.appendChild(conf);
+
+setTimeout(()=>{
+conf.remove();
+},3000);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
